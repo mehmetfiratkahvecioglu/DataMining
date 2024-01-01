@@ -53,6 +53,8 @@ with open('urunler.csv', mode='w', newline='', encoding='utf-8') as file:
 
             # CSV dosyasına yaz
             writer.writerow([title, price, detail_link, feature_list])
+            #boşluk bırak her ürün arasında
+            writer.writerow([])
 
             # Detay sekmesini kapat ve ana sayfaya geri dön
             driver.close()
