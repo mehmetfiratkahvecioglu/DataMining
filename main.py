@@ -1,7 +1,8 @@
 from selenium import webdriver
-import time
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
 
 options = webdriver.ChromeOptions()
 options.add_experimental_option("detach", True)
@@ -9,10 +10,11 @@ options.add_experimental_option("detach", True)
 driver = webdriver.Chrome(options=options)
 driver.get("https://www.trendyol.com/sr?wc=114&os=1&sk=1")
 
-time.sleep(5)  # Dinamik içerik yüklendiğinde yeterli zaman sağlamak için
-
 try:
     # Ürün kartlarını bul
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.p-card-wrppr"))
+    )
     products = driver.find_elements(By.CSS_SELECTOR, "div.p-card-wrppr")
 
     for index, product in enumerate(products):
@@ -28,11 +30,22 @@ try:
         driver.switch_to.window(driver.window_handles[1])
         driver.get(detail_link)
 
-        time.sleep(3)  # Detay sayfasının yüklenmesini bekleyin
+        # Detay sayfasının yüklenmesini bekleyin
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "ul.detail-attr-container li.detail-attr-item"))
+        )
+        feature_items = driver.find_elements(By.CSS_SELECTOR, "ul.detail-attr-container li.detail-attr-item")
 
-        # Detay sayfasından bilgileri çek (örnek olarak ürün özelliklerini alalım)
+        feature_list = {}
+        for item in feature_items:
+            feature_name = item.find_element(By.CSS_SELECTOR, "span").text
+            # 'b' etiketinin varlığını kontrol edin ve ona göre değer alın
+            feature_value_elements = item.find_elements(By.CSS_SELECTOR, "b")
+            if feature_value_elements:
+                feature_value = feature_value_elements[0].text
+                feature_list[feature_name] = feature_value
 
-        print(f"Ürün Adı: {title} - Fiyat: {price} - Link: {detail_link}")
+        print(f"Ürün Adı: {title} - Fiyat: {price} - Link: {detail_link} - Özellikler: {feature_list}")
 
         # Detay sekmesini kapat ve ana sayfaya geri dön
         driver.close()
