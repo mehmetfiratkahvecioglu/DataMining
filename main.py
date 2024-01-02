@@ -9,7 +9,9 @@ options = webdriver.ChromeOptions()
 options.add_experimental_option("detach", True)
 
 driver = webdriver.Chrome(options=options)
-driver.get("https://www.trendyol.com/sr?wc=114&os=1&sk=1")
+driver.get("https://www.trendyol.com/sr?wc=114&os=1&sk=1&pi=7")
+driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+time.sleep(3)  
 
 # CSV dosyasını aç ve bir yazıcı nesnesi oluştur
 with open('urunler.csv', mode='w', newline='', encoding='utf-8') as file:
@@ -23,6 +25,7 @@ with open('urunler.csv', mode='w', newline='', encoding='utf-8') as file:
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.p-card-wrppr"))
         )
         products = driver.find_elements(By.CSS_SELECTOR, "div.p-card-wrppr")
+        print("Toplam {} ürün bulundu.".format(len(products)))
 
         for index, product in enumerate(products):
             # Ürün adını ve fiyatını bul
@@ -55,6 +58,7 @@ with open('urunler.csv', mode='w', newline='', encoding='utf-8') as file:
             writer.writerow([title, price, detail_link, feature_list])
             #boşluk bırak her ürün arasında
             writer.writerow([])
+            print("{}. ürün eklendi".format(index + 1))
 
             # Detay sekmesini kapat ve ana sayfaya geri dön
             driver.close()
